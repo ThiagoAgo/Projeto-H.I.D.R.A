@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Fatores de Correção</title>
+  <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial;
+      background: #f2f2f2;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px #aaa;
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 20px;
+      text-align: left;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+    }
+    input[type=number] {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    input[type=submit] {
+      background: #007BFF;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
+    }
+    input[type=submit]:hover {
+      background: #0056b3;
+    }
+    .status {
+      margin-top: 15px;
+      color: #555;
+      font-size: 14px;
+    }
+    .value {
+      font-size: 13px;
+      color: #333;
+      margin-top: 4px;
+    }
+    @media (max-width: 500px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <form id="form">
+    <h2>Fatores de Correção</h2>
+    <div class="grid">
+      <div class="field">
+        <label for="fc_bateria">Bateria</label>
+        <input type="number" id="fc_bateria" inputmode="decimal" lang="en" step="0.001">
+        <div class="value">Corrigida: <span id="val_bateria">-</span></div>
+        <div class="value">Original: <span id="val_bateria_original">-</span></div>
+      </div>
+      <div class="field">
+        <label for="fc_ph">pH</label>
+        <input type="number" id="fc_ph" inputmode="decimal" lang="en" step="0.001">
+        <div class="value">Corrigida: <span id="val_ph">-</span></div>
+        <div class="value">Original: <span id="val_ph_original">-</span></div>
+      </div>
+      <div class="field">
+        <label for="fc_turbidez">Turbidez</label>
+        <input type="number" id="fc_turbidez" inputmode="decimal" lang="en" step="0.001">
+        <div class="value">Corrigida: <span id="val_turbidez">-</span></div>
+        <div class="value">Original: <span id="val_turbidez_original">-</span></div>
+      </div>
+      <div class="field">
+        <label for="fc_temperatura">Temperatura</label>
+        <input type="number" id="fc_temperatura" inputmode="decimal" lang="en" step="0.001">
+        <div class="value">Corrigida: <span id="val_temperatura">-</span></div>
+        <div class="value">Original: <span id="val_temperatura_original">-</span></div>
+      </div>
+      <div class="field">
+        <label for="fc_condutividade">Condutividade</label>
+        <input type="number" id="fc_condutividade" inputmode="decimal" lang="en" step="0.001">
+        <div class="value">Corrigida: <span id="val_condutividade">-</span></div>
+        <div class="value">Original: <span id="val_condutividade_original">-</span></div>
+      </div>
+      <div class="field">
+        <label for="fc_profundicade">Profundidade</label>
+        <input type="number" id="fc_profundicade" inputmode="decimal" lang="en" step="0.001">
+        <div class="value">Corrigida: <span id="val_profundicade">-</span></div>
+        <div class="value">Original: <span id="val_profundicade_original">-</span></div>
+      </div>
+    </div>
+    <input type="submit" value="Atualizar">
+    <div class="status" id="status"></div>
+  </form>
+
+  <script>
+    // Função para calcular e exibir o valor original
+    function calcularEExibirOriginal(sensor) {
+        const fc = parseFloat(document.getElementById(`fc_${sensor}`).value);
+        const leitura = parseFloat(document.getElementById(`val_${sensor}`).innerText.replace(',', '.'));
+        const originalSpan = document.getElementById(`val_${sensor}_original`);
+
+        if (!isNaN(fc) && !isNaN(leitura) && fc !== 0) {
+            originalSpan.innerText = (leitura / fc).toFixed(3).replace('.', ',');
+        } else {
+            originalSpan.innerText = '-';
+        }
+    }
+
+    // Função para carregar os dados
+    function carregarDados() {
+      fetch('/config')
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById("fc_bateria").value = data.fc_bateria;
+          document.getElementById("fc_ph").value = data.fc_ph;
+          document.getElementById("fc_turbidez").value = data.fc_turbidez;
+          document.getElementById("fc_temperatura").value = data.fc_temperatura;
+          document.getElementById("fc_condutividade").value = data.fc_condutividade;
+          document.getElementById("fc_profundicade").value = data.fc_profundicade;
+        });
+
+      fetch('/leituras')
+        .then(res => res.json())
+        .then(data => {
+          // Formatando os valores corrigidos para 3 casas decimais
+          document.getElementById("val_bateria").innerText = parseFloat(data.leitura_bateria).toFixed(3).replace('.', ',');
+          document.getElementById("val_ph").innerText = parseFloat(data.leitura_ph).toFixed(3).replace('.', ',');
+          document.getElementById("val_turbidez").innerText = parseFloat(data.leitura_turbidez).toFixed(3).replace('.', ',');
+          document.getElementById("val_temperatura").innerText = parseFloat(data.leitura_temperatura).toFixed(3).replace('.', ',');
+          document.getElementById("val_condutividade").innerText = parseFloat(data.leitura_condutividade).toFixed(3).replace('.', ',');
+          document.getElementById("val_profundicade").innerText = parseFloat(data.leitura_profundicade).toFixed(3).replace('.', ',');
+          
+          // Chamar a função de cálculo para todos os sensores após carregar as leituras
+          calcularEExibirOriginal('bateria');
+          calcularEExibirOriginal('ph');
+          calcularEExibirOriginal('turbidez');
+          calcularEExibirOriginal('temperatura');
+          calcularEExibirOriginal('condutividade');
+          calcularEExibirOriginal('profundicade');
+        });
+    }
+
+    // Adicionar event listeners para os campos de fator de correção
+    ['bateria', 'ph', 'turbidez', 'temperatura', 'condutividade', 'profundicade'].forEach(sensor => {
+        document.getElementById(`fc_${sensor}`).addEventListener('input', () => {
+            calcularEExibirOriginal(sensor);
+        });
+    });
+
+    function parseValor(id) {
+      const val = document.getElementById(id).value.replace(',', '.');
+      return parseFloat(val);
+    }
+
+    document.getElementById("form").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const dados = {
+        fc_bateria: parseValor("fc_bateria"),
+        fc_ph: parseValor("fc_ph"),
+        fc_turbidez: parseValor("fc_turbidez"),
+        fc_temperatura: parseValor("fc_temperatura"),
+        fc_condutividade: parseValor("fc_condutividade"),
+        fc_profundicade: parseValor("fc_profundicade")
+      };
+
+      fetch('/atualizar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      })
+      .then(res => res.text())
+      .then(texto => {
+        document.getElementById("status").innerText = texto;
+      });
+    });
+
+    carregarDados();
+  </script>
+</body>
+</html>

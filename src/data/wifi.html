@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Editor de Configuração JSON</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body {
+      font-family: Arial;
+      background: #f2f2f2;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px #aaa;
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+    }
+    h2 {
+      margin-top: 30px;
+      margin-bottom: 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 20px;
+      text-align: left;
+    }
+    label {
+      font-weight: 700;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+    }
+    input#ssid, input#senha, input#apn, input#url {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    input#potencia_tx {
+        width: 100%;
+        margin-top: 10px;
+    }
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
+    .toggle-container input {
+      position: absolute;
+      opacity: 0;
+      height: 0;
+      width: 0;
+    }
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+      background-color: #ccc;
+      border-radius: 11px;
+      transition: background-color 0.2s ease;
+    }
+    .toggle-switch::before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      border-radius: 50%;
+      transition: transform 0.2s ease;
+    }
+    input:checked + .toggle-switch {
+      background-color: #007bff;
+    }
+    input:checked + .toggle-switch::before {
+      transform: translateX(18px);
+    }
+    .toggle-container label {
+      margin-left: 8px;
+      font-weight: normal;
+    }
+    button {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      padding: 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .value {
+        font-size: 13px;
+        color: #333;
+        margin-top: 4px;
+        text-align: center;
+    }
+    @media (max-width: 500px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <form id="jsonForm" method="POST" action="/uploadData" enctype="multipart/form-data">
+    <h2>Wi-Fi</h2>
+    <div class="grid">
+      <div class="field">
+        <label for="ssid">SSID</label>
+        <input type="text" id="ssid" name="ssid" value="wifi" required>
+      </div>
+      <div class="field">
+        <label for="senha">Senha</label>
+        <input type="text" id="senha" name="senha" value="12345678" required>
+      </div>
+      <div class="field">
+        <label for="potencia_tx">Potência TX</label>
+        <input type="range" id="potencia_tx" name="potencia_tx" min="8" max="84" value="40" required oninput="document.getElementById('potencia_tx_value').innerText = 'Potência ' + (this.value / 4).toFixed(2) + ' dbm';">
+        <div class="value"><span id="potencia_tx_value">Potência 10.00 dbm</span></div>
+      </div>
+    <div class="field">
+        <label >Wi-Fi Sempre Ligado</label>
+          <label class="toggle-container" style="align-self: center">
+          <input type="checkbox" id="wifi_sempre_ligado" name="wifi_sempre_ligado">
+          <span class="toggle-switch"></span>
+          
+        </label>
+      </div>
+    </div>
+    <h2>Módulo 4G LTE</h2>
+    <div class="grid">
+      <div class="field">
+        <label for="apn">APN</label>
+        <input type="text" id="apn" name="apn" required>
+      </div>
+      <div class="field">
+        <label for="url">URL</label>
+        <input type="url" id="url" name="url" required>
+      </div>
+    </div>
+    <input type="hidden" name="upload" id="uploadField">
+    <button type="button" onclick="gerarEEnviarJson()">Enviar JSON</button>
+    <button type="button" onclick="baixarJson()">Baixar JSON</button>
+  </form>
+
+  <script>
+    let dadosJSON = {};
+
+    window.onload = function () {
+      fetch('http://192.168.4.1/jwifi')
+        .then(response => {
+          if (!response.ok) throw new Error("Erro ao carregar JSON");
+          return response.json();
+        })
+        .then(data => {
+          dadosJSON = data;
+          preencherFormulario(dadosJSON);
+        })
+        .catch(error => {
+          alert("Erro: " + error.message);
+        });
+    };
+
+    function preencherFormulario(dados) {
+      document.getElementById('ssid').value = dados.ssid || "wifi";
+      document.getElementById('senha').value = dados.senha || "12345678";
+      document.getElementById('potencia_tx').value = dados.potencia_tx || 40;
+      document.getElementById('potencia_tx_value').innerText = 'Potencia ' + ((dados.potencia_tx || 40) / 4).toFixed(2) + ' dbm';
+      document.getElementById('wifi_sempre_ligado').checked = dados.wifi_sempre_ligado == 1;
+      document.getElementById('apn').value = dados.apn || "";
+      document.getElementById('url').value = dados.url || "";
+    }
+
+    function gerarEEnviarJson() {
+      const jsonAtualizado = {
+        ssid: document.getElementById('ssid').value || "wifi",
+        senha: document.getElementById('senha').value || "12345678",
+        potencia_tx: parseInt(document.getElementById('potencia_tx').value) || 40,
+        wifi_sempre_ligado: document.getElementById('wifi_sempre_ligado').checked ? 1 : 0,
+        apn: document.getElementById('apn').value,
+        url: document.getElementById('url').value
+      };
+
+      const blob = new Blob([JSON.stringify(jsonAtualizado)], { type: 'application/json' });
+      const file = new File([blob], "wifi.json", { type: 'application/json' });
+
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+
+      const hiddenInput = document.createElement("input");
+      hiddenInput.type = "file";
+      hiddenInput.name = "upload";
+      hiddenInput.files = dataTransfer.files;
+
+      const form = document.getElementById("jsonForm");
+      form.appendChild(hiddenInput);
+      form.submit();
+    }
+
+    function baixarJson() {
+      const jsonAtualizado = {
+        ssid: document.getElementById('ssid').value || "wifi",
+        senha: document.getElementById('senha').value || "12345678",
+        potencia_tx: parseInt(document.getElementById('potencia_tx').value) || 40,
+        wifi_sempre_ligado: document.getElementById('wifi_sempre_ligado').checked ? 1 : 0,
+        apn: document.getElementById('apn').value,
+        url: document.getElementById('url').value
+      };
+
+      const blob = new Blob([JSON.stringify(jsonAtualizado, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "wifi.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>

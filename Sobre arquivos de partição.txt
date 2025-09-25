@@ -1,0 +1,9 @@
+Link para ferramenta de partição: 
+https://thelastoutpostworkshop.github.io/microcontroller_devkit/esp32partitionbuilder/
+___________________________________________________________________________________
+Arquivo	     |	Partição APP|	Partição OTA  |	Partição SPIFFS| Tamanho da Flash |
+-------------|--------------|-----------------|----------------|------------------|
+min_spiffs   |	1.875 MB    |	1.875 MB      |	0.1875 MB      |  4  MB	          |
+spiffs_8MB   |	1.875 MB    |	1.875 MB      |	4.1250 MB      |  8  MB	          |
+spiffs_16MB  |	1.875 MB    |	1.875 MB      |	12.125 MB      |  16 MB	          |
+_____________|______________|_________________|________________|__________________|

@@ -1,0 +1,8 @@
+{
+  "ssid": "H.I.D.R.A",
+  "senha": "AttUACSA_ESP",
+  "potencia_tx": 65,
+  "wifi_sempre_ligado": 1,
+  "apn": "timbrasil.br",
+  "url": "https://teste-f7543-default-rtdb.firebaseio.com/teste.json"
+}

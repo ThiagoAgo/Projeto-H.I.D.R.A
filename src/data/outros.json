@@ -1,0 +1,9 @@
+{
+  "tempo_leitura": 3560,
+  "tentativas_sim": 5,
+  "tentativas_sinal_rede": 21,
+  "tentativas_registro_rede": 10,
+  "tentativas_GPS": 12,
+  "Intevalo_entre_tentativas": 5000,
+  "dormir": 0
+}

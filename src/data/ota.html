@@ -1,0 +1,88 @@
+<head>
+  <title>OTA</title>
+  <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+     font-family: Arial;
+      text-align: center;
+      margin-top: 10vh;
+      background: #f2f2f2;
+    }
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      display: inline-block;
+      box-shadow: 0 2px 6px #aaa;
+      width: 90%%;
+    }
+    input[type=submit] {
+      background: #007BFF;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+    }
+    input[type=submit]:hover {
+      background: #0056b3;
+    }
+    .info {
+      margin-top: 20px;
+      color: #555;
+      font-size: 14px;
+    }
+    a {
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <form method="POST" action="/update" enctype="multipart/form-data">
+    <h2>Atualização OTA</h2>
+    <input type="file" name="update" required /><br /><br />
+    <input type="submit" value="Enviar Firmware" />
+  </form>
+  <div class="info">ID: %ID% | Versão do Software: v %VERSAO% | Codigo de Erro: %ERRO%</div>
+  <div class="info">
+  	<H2>Outras Paginas:</H2>
+  	<a href="http://192.168.4.1/enviarArquios">Enviar Arquivos |</a>
+  	<a href="http://192.168.4.1/sensores">Calibrar sensores |</a>
+    <a href="http://192.168.4.1/wifi">Configurações de rede</a> 
+    <BR>
+    <a href="http://192.168.4.1/log_atual">Historico de comandos 4G (Atual) | </a>
+    <a href="http://192.168.4.1/log_anterior">Historico de comandos 4G (Anterior)</a>
+  	<BR><BR>
+    <a href="http://192.168.4.1/config">Json de calibrações |</a>
+  	<a href="http://192.168.4.1/leituras">Json de leituras |</a>
+  	<a href="http://192.168.4.1/id">Json de identificação</a>
+    <BR>
+    <a href="http://192.168.4.1/jwifi">Json de rede |</a>
+    <a href="http://192.168.4.1/joutros">Json Outros</a>
+    <BR><BR>
+    <a href="http://192.168.4.1/reiniciar">Reinicar H.I.D.R.A</a>
+  </div>
+
+  <script>
+
+    fetch('/id')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Erro ao carregar JSON');
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Seleciona a div que contém o texto com os placeholders
+        const infoDiv = document.querySelector('.info');
+
+        // Substitui %ID% e %VERSAO% pelos valores do JSON
+        infoDiv.textContent = infoDiv.textContent
+          .replace('%ID%', data.id)
+          .replace('%VERSAO%', data.versao)
+          .replace('%ERRO%', data.Cod_Erro);
+      })
+      .catch(error => {
+        console.error('Erro ao buscar o JSON:', error);
+      });
+  </script>
+</body>
